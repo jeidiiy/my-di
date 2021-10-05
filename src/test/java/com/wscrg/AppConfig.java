@@ -4,5 +4,11 @@ package com.wscrg;
 @ComponentScan
 public class AppConfig {
 
-    public AppConfig() {}
+    public AppConfig() {
+    }
+
+    @Bean
+    public DiscountPolicy getFixDiscountPolicy() {
+        return new FixDiscountPolicy();
+    }
 }

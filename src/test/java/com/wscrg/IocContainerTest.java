@@ -13,6 +13,6 @@ public class IocContainerTest {
         IocContainer iocContainer = new IocContainer(AppConfig.class);
 
         Set<String> beans = iocContainer.getBeans();
-        assertEquals(3, beans.size());
+        assertEquals(4, beans.size());
     }
 }
