@@ -3,6 +3,7 @@ package com.wscrg;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -102,5 +103,9 @@ public class IocContainer {
 
     public Set<String> getBeans() {
         return beanMap.keySet();
+    }
+
+    public Collection<?> getBeansInstance() {
+        return beanMap.values();
     }
 }
