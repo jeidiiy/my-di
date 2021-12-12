@@ -1,5 +1,7 @@
 package com.wscrg;
 
+import org.reflections.Reflections;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -7,15 +9,15 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.reflections.Reflections;
+import java.util.stream.Collectors;
 
 public class IocContainer {
 
-    private static Map<String, Object> beanMap = new ConcurrentHashMap<>();
+    private final static Map<String, Object> beanMap = new ConcurrentHashMap<>();
 
     public IocContainer(Class<?> appConfig) {
         getObject(appConfig);
+        injectBean();
     }
 
     public static <T> void getObject(Class<T> classType) {
@@ -95,6 +97,28 @@ public class IocContainer {
 
     }
 
+    /**
+     * @Injectable이 선언된 필드를 찾고 해당 빈을 주입한다.
+     **/
+    private static void injectBean() {
+        // 필드 주입
+        Collection<Object> beans = beanMap.values();
+        beans.forEach(bean -> {
+            Arrays.stream(bean.getClass().getDeclaredFields()).collect(Collectors.toSet())
+                    .forEach(field -> {
+                        if (field.getAnnotation(Injectable.class) != null) {
+                            Object o = beanMap.get(field.getName());
+                            field.setAccessible(true);
+                            try {
+                                field.set(bean, o);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+        });
+    }
+
     private static String lowerCaseFirst(String str) {
         char[] arr = str.toCharArray();
         arr[0] = Character.toLowerCase(arr[0]);
@@ -103,6 +127,10 @@ public class IocContainer {
 
     public Set<String> getBeans() {
         return beanMap.keySet();
+    }
+
+    public Object getBean(String key) {
+        return beanMap.get(key);
     }
 
     public Collection<?> getBeansInstance() {

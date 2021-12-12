@@ -1,10 +1,10 @@
 package com.wscrg;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 import java.util.Set;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class IocContainerTest {
 
@@ -14,5 +14,15 @@ public class IocContainerTest {
 
         Set<String> beans = iocContainer.getBeans();
         assertEquals(4, beans.size());
+    }
+
+    @Test
+    public void fieldInjectTest() {
+        IocContainer iocContainer = new IocContainer(AppConfig.class);
+
+        AppService appService = (AppService) iocContainer.getBean("appService");
+
+        System.out.println(appService.getAppRepository());
+        assertEquals("John", appService.findUser(1L).getUsername());
     }
 }
