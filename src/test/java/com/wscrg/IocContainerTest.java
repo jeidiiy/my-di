@@ -37,4 +37,15 @@ public class IocContainerTest {
         assertEquals("John", constructorService.findUser(1L).getUsername());
         assertNotNull(constructorService.getAppService());
     }
+
+    @Test
+    public void setterInjectTest() {
+        IocContainer iocContainer = new IocContainer(AppConfig.class);
+
+        SetterService setterService = (SetterService) iocContainer.getBean("setterService");
+
+        System.out.println(setterService.getAppRepository());
+        assertEquals("John", setterService.findUser(1L).getUsername());
+        assertNotNull(setterService.getAppService());
+    }
 }

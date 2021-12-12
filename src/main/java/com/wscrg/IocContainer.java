@@ -126,6 +126,28 @@ public class IocContainer {
                     });
         });
 
+        // 세터 주입
+        beans.forEach(bean -> {
+            Arrays.stream(bean.getClass().getDeclaredMethods()).collect(Collectors.toSet())
+                    .forEach(method -> {
+                        if (method.getAnnotation(Injectable.class) != null) {
+                            Parameter[] parameters = method.getParameters();
+                            Arrays.stream(parameters).forEach(param -> {
+                                Object o = beanMap.get(lowerCaseFirst(param.getType().getSimpleName()));
+                                Field foundField = Arrays.stream(bean.getClass().getDeclaredFields()).filter(field ->
+                                        field.getType().getSimpleName().equals(param.getType().getSimpleName())
+                                ).findFirst().get();
+                                foundField.setAccessible(true);
+                                try {
+                                    foundField.set(bean, o);
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
+                    });
+        });
+
         // 필드 주입
         beans.forEach(bean -> {
             Arrays.stream(bean.getClass().getDeclaredFields()).collect(Collectors.toSet())
