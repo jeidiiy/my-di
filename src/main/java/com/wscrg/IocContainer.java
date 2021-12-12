@@ -3,7 +3,9 @@ package com.wscrg;
 import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -101,8 +103,30 @@ public class IocContainer {
      * @Injectable이 선언된 필드를 찾고 해당 빈을 주입한다.
      **/
     private static void injectBean() {
-        // 필드 주입
+        // 생성자 주입
         Collection<Object> beans = beanMap.values();
+        beans.forEach(bean -> {
+            Arrays.stream(bean.getClass().getDeclaredConstructors()).collect(Collectors.toSet())
+                    .forEach(constructor -> {
+                        if (constructor.getAnnotation(Injectable.class) != null) {
+                            Parameter[] parameters = constructor.getParameters();
+                            Arrays.stream(parameters).forEach(param -> {
+                                Object o = beanMap.get(lowerCaseFirst(param.getType().getSimpleName()));
+                                Field foundField = Arrays.stream(bean.getClass().getDeclaredFields()).filter(field ->
+                                        field.getType().getSimpleName().equals(param.getType().getSimpleName())
+                                ).findFirst().get();
+                                foundField.setAccessible(true);
+                                try {
+                                    foundField.set(bean, o);
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
+                    });
+        });
+
+        // 필드 주입
         beans.forEach(bean -> {
             Arrays.stream(bean.getClass().getDeclaredFields()).collect(Collectors.toSet())
                     .forEach(field -> {
